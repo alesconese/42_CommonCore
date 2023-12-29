@@ -71,9 +71,9 @@ int		render_fractal(t_data *fractal);
 
 void	render_mandelbrot(t_data *fractal);
 
-void	render_burningship(t_data *fractal);
-
 void	render_julia(t_data *fractal);
+
+void	render_burningship(t_data *fractal);
 
 void	ft_put_pixel(t_img *img, int x, int y, int color);
 

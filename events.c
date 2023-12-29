@@ -17,14 +17,14 @@ int	ft_mousezoom(int keysym, int x, int y, t_data *fractal)
 	if (keysym == ON_MOUSEUP)
 	{
 		fractal->zoom *= 0.9;
-		if (fractal->zoom > 0.005)
-			fractal->iterations *= 1.05;
+		if (fractal->iterations < 256)
+			fractal->iterations += 2;
 	}
 	else if (keysym == ON_MOUSEDOWN)
 	{
 		fractal->zoom *= 1.1;
-		if (fractal->zoom > 0.005 && fractal->iterations > 32)
-			fractal->iterations *= 0.95;
+		if (fractal->iterations > 32)
+			fractal->iterations += 2;
 	}
 	fractal->shift_x += ((double)x - WIDTH / 2) / (WIDTH / 2) * fractal->zoom;
 	if (fractal->set != 3)
@@ -48,6 +48,13 @@ void	shift_color(t_data *fractal, int sw)
 		fractal->color = 0;
 }
 
+int	ft_exit(t_data *fractal)
+{
+	mlx_destroy_image(fractal->mlx_ptr, fractal->img.mlx_img);
+	mlx_destroy_window(fractal->mlx_ptr, fractal->mlx_win);
+	exit(0);
+}
+
 int	ft_keypressed(int keysym, t_data *fractal)
 {
 	if (keysym == K_ESC)
@@ -69,9 +76,9 @@ int	ft_keypressed(int keysym, t_data *fractal)
 	if (fractal->set == 2 && keysym == K_L)
 		fractal->julia_im += 0.01;
 	if (keysym == K_PLUS)
-		fractal->iterations *= 1.05;
+		fractal->iterations += 2;
 	if (keysym == K_MINUS)
-		fractal->iterations *= 0.95;
+		fractal->iterations -= 2;
 	if (keysym == K_SPACE)
 		shift_color(fractal, 1);
 	return (0);

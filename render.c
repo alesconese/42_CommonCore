@@ -44,6 +44,9 @@ static void	ft_huetorgb1(float *r, float *g, float *b, int hue)
 		*g = 1.0;
 		*b = ((float)hue - 120) / 60;
 	}
+	*r *= 255;
+	*g *= 255;
+	*b *= 255;
 }
 
 static void	ft_huetorgb2(float *r, float *g, float *b, int hue)
@@ -66,6 +69,9 @@ static void	ft_huetorgb2(float *r, float *g, float *b, int hue)
 		*g = 0;
 		*b = 1 - ((float)hue - 300) / 60;
 	}
+	*r *= 255;
+	*g *= 255;
+	*b *= 255;
 }
 
 int	ft_getcolor(int i, t_data *fractal)
@@ -73,25 +79,27 @@ int	ft_getcolor(int i, t_data *fractal)
 	float	r;
 	float	g;
 	float	b;
+	int		hue;
 
-	if (i == fractal->iterations)
-	{
-		r = 0;
-		g = 0;
-		b = 0;
-	}
+	if ((float)i / fractal->iterations < 0.5)
+		hue = fractal->color;
 	else
 	{
-		if (fractal->color < 180)
-			ft_huetorgb1(&r, &g, &b, fractal->color);
-		else
-			ft_huetorgb2(&r, &g, &b, fractal->color);
-		r *= (float)i / fractal->iterations;
-		g *= (float)i / fractal->iterations;
-		b *= (float)i / fractal->iterations;
+		hue = fractal->color + ((float)i / fractal->iterations - 0.5) * 120;
+		if (hue > 360)
+			hue -= 360;
 	}
-	return ((unsigned char)(r * 255) << 16 | (unsigned char)(g * 255) << 8 \
-			| (unsigned char)(b * 255));
+	if (hue < 180)
+		ft_huetorgb1(&r, &g, &b, hue);
+	else
+		ft_huetorgb2(&r, &g, &b, hue);
+	if ((float)i / fractal->iterations < 0.5)
+	{
+		r *= (float)i * 2 / fractal->iterations;
+		g *= (float)i * 2 / fractal->iterations;
+		b *= (float)i * 2 / fractal->iterations;
+	}
+	return ((unsigned char)r << 16 | (unsigned char)g << 8 | (unsigned char)b);
 }
 
 void	ft_put_pixel(t_img *img, int x, int y, int color)

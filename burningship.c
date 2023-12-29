@@ -21,8 +21,8 @@ static int	ft_isburning(double c_re, double c_im, t_data *fractal)
 
 	z_re = c_re;
 	z_im = c_im;
-	i = 0;
-	while (i <= fractal->iterations)
+	i = 1;
+	while (i < fractal->iterations)
 	{
 		if ((z_re * z_re + z_im * z_im) > 4)
 			return (i);
@@ -33,7 +33,7 @@ static int	ft_isburning(double c_re, double c_im, t_data *fractal)
 		z_im = tmp;
 		i++;
 	}
-	return (0);
+	return (i);
 }
 
 void	render_burningship(t_data *fractal)
@@ -42,6 +42,7 @@ void	render_burningship(t_data *fractal)
 	int		x;
 	double	c_im;
 	double	c_re;
+	int		i;
 
 	y = -1;
 	while (++y < HEIGHT)
@@ -53,8 +54,11 @@ void	render_burningship(t_data *fractal)
 		{
 			c_re = (-2.0 + (double)x * (2.0 - (-2.0)) / WIDTH) \
 					* fractal->zoom + fractal->shift_x;
-			ft_put_pixel(&fractal->img, x, y, \
-					ft_getcolor(ft_isburning(c_re, c_im, fractal), fractal));
+			i = ft_isburning(c_re, c_im, fractal);
+			if (i == fractal->iterations)
+				ft_put_pixel(&fractal->img, x, y, 0);
+			else
+				ft_put_pixel(&fractal->img, x, y, ft_getcolor(i, fractal));
 		}
 	}
 	mlx_put_image_to_window(fractal->mlx_ptr, fractal->mlx_win, \
