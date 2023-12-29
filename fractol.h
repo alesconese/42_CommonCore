@@ -15,6 +15,7 @@
 
 # include "./libft/libft.h"
 # include "./mlx/mlx.h"
+# include <math.h>
 
 # define WIDTH 800
 # define HEIGHT 800
@@ -40,6 +41,7 @@ typedef struct s_data
 	double	julia_re;
 	double	julia_im;
 	int		iterations;
+	int		color;
 }				t_data;
 
 enum
@@ -59,12 +61,17 @@ enum
 	K_O				=	31,
 	K_P				=	35,
 	K_K				=	40,
-	K_L				=	37
+	K_L				=	37,
+	K_PLUS			=	24,
+	K_MINUS			=	27,
+	K_SPACE			=	49
 };
 
 int		render_fractal(t_data *fractal);
 
 void	render_mandelbrot(t_data *fractal);
+
+void	render_burningship(t_data *fractal);
 
 void	render_julia(t_data *fractal);
 
@@ -77,5 +84,7 @@ int		ft_mousezoom(int keysym, int x, int y, t_data *fractal);
 int		ft_keypressed(int keysym, t_data *fractal);
 
 int		ft_exit(t_data *fractal);
+
+void	shift_color(t_data *fractal, int sw);
 
 #endif

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   mandel_julia.c                                     :+:      :+:    :+:   */
+/*   mandelbrot.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ade-tole <ade-tole@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/22 00:11:19 by ade-tole          #+#    #+#             */
-/*   Updated: 2023/12/22 00:11:21 by ade-tole         ###   ########.fr       */
+/*   Created: 2023/12/29 16:34:37 by ade-tole          #+#    #+#             */
+/*   Updated: 2023/12/29 16:34:38 by ade-tole         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ static int	ft_ismandelbrot(double c_re, double c_im, t_data *fractal)
 
 	z_re = c_re;
 	z_im = c_im;
-	i = 1;
-	while (i <= fractal->iterations)
+	i = 0;
+	while (i < fractal->iterations)
 	{
 		if ((z_re * z_re + z_im * z_im) > 4)
 			return (i);
@@ -31,7 +31,7 @@ static int	ft_ismandelbrot(double c_re, double c_im, t_data *fractal)
 		z_im = tmp;
 		i++;
 	}
-	return (0);
+	return (i);
 }
 
 void	render_mandelbrot(t_data *fractal)

@@ -14,11 +14,11 @@ NAME = fractol
 
 CC = gcc
 
-FLAGS = -Wall -Wextra -Werror -MMD
+FLAGS = -Wall -Wextra -Werror -MMD -g
 
 MLX = -lmlx -Lmlx -framework OpenGL -framework AppKit
 
-SRC =  fractol.c render.c mandelbrot.c julia.c events.c
+SRC =  fractol.c render.c mandelbrot.c julia.c burningship.c events.c
 
 OBJ = $(SRC:.c=.o)
 

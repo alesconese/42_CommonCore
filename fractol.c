@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   fractol.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ade-tole <ade-tole@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/17 20:16:47 by ade-tole          #+#    #+#             */
-/*   Updated: 2023/12/17 20:16:50 by ade-tole         ###   ########.fr       */
+/*   Created: 2023/12/29 16:33:48 by ade-tole          #+#    #+#             */
+/*   Updated: 2023/12/29 16:33:52 by ade-tole         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	ft_exit(t_data *fractal)
 static void	ft_argerror(void)
 {
 	ft_putstr_fd("Error. Format: ./fractol mandelbrot OR \
-			./fractol julia <c.real> <c.i>", 1);
+./fractol julia <c.real> <c.i>", 1);
 	exit(1);
 }
 
@@ -78,24 +78,26 @@ static void	init_fractal(t_data *fractal)
 	fractal->zoom = 1.0;
 	fractal->shift_x = 0;
 	fractal->shift_y = 0;
-	fractal->iterations = 42;
+	fractal->iterations = 32;
+	fractal->color = 275;
 }
 
 int	main(int argc, char **argv)
 {
 	t_data	fractal;
 
-	if (!((argc == 2 && !ft_strncmp(argv[1], "mandelbrot", 10)) || \
-			(argc == 4 && !ft_strncmp(argv[1], "julia", 5))))
-		ft_argerror();
-	if (!ft_strncmp(argv[1], "mandelbrot", 10))
+	if (argc == 2 && !ft_strncmp(argv[1], "mandelbrot", 10))
 		fractal.set = 1;
-	else if (!ft_strncmp(argv[1], "julia", 5))
+	else if (argc == 4 && !ft_strncmp(argv[1], "julia", 5))
 	{
 		fractal.set = 2;
 		fractal.julia_re = ft_atodouble(argv[2]);
 		fractal.julia_im = ft_atodouble(argv[3]);
 	}
+	else if (argc == 2 && !ft_strncmp(argv[1], "burningship", 11))
+		fractal.set = 3;
+	else
+		ft_argerror();
 	init_fractal(&fractal);
 	mlx_loop_hook(fractal.mlx_ptr, &render_fractal, &fractal);
 	mlx_key_hook(fractal.mlx_win, &ft_keypressed, &fractal);

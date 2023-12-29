@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "fractol.h"
-#include <stdio.h>//RM!!!!!
 
 int	ft_mousezoom(int keysym, int x, int y, t_data *fractal)
 {
@@ -24,18 +23,33 @@ int	ft_mousezoom(int keysym, int x, int y, t_data *fractal)
 	else if (keysym == ON_MOUSEDOWN)
 	{
 		fractal->zoom *= 1.1;
-		if (fractal->zoom < 0.005)//FIX!!!!!!
+		if (fractal->zoom > 0.005 && fractal->iterations > 32)
 			fractal->iterations *= 0.95;
 	}
 	fractal->shift_x += ((double)x - WIDTH / 2) / (WIDTH / 2) * fractal->zoom;
-	fractal->shift_y += ((double)y - HEIGHT / 2) / (HEIGHT / 2) * fractal->zoom;
-	printf("zoom:%lf|iterations:%d\n", fractal->zoom, fractal->iterations);//RM!!!!!!
+	if (fractal->set != 3)
+		fractal->shift_y += ((double)y - HEIGHT / 2) / (HEIGHT / 2) \
+				* fractal->zoom;
+	else
+		fractal->shift_y -= ((double)y - HEIGHT / 2) / (HEIGHT / 2) \
+				* fractal->zoom;
 	return (0);
+}
+
+void	shift_color(t_data *fractal, int sw)
+{
+	static int	shift = -1;
+
+	if (sw)
+		shift = -shift;
+	if (shift > 0)
+		fractal->color++;
+	if (fractal->color > 360)
+		fractal->color = 0;
 }
 
 int	ft_keypressed(int keysym, t_data *fractal)
 {
-	printf("%d\n", keysym);//RM!!!!!
 	if (keysym == K_ESC)
 		ft_exit(fractal);
 	if (keysym == K_W || keysym == K_UARR)
@@ -54,5 +68,11 @@ int	ft_keypressed(int keysym, t_data *fractal)
 		fractal->julia_im -= 0.01;
 	if (fractal->set == 2 && keysym == K_L)
 		fractal->julia_im += 0.01;
+	if (keysym == K_PLUS)
+		fractal->iterations *= 1.05;
+	if (keysym == K_MINUS)
+		fractal->iterations *= 0.95;
+	if (keysym == K_SPACE)
+		shift_color(fractal, 1);
 	return (0);
 }

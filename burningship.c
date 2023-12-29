@@ -1,54 +1,60 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   julia.c                                            :+:      :+:    :+:   */
+/*   burningship.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ade-tole <ade-tole@student.42barcel>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/12/27 20:19:48 by ade-tole          #+#    #+#             */
-/*   Updated: 2023/12/27 20:19:50 by ade-tole         ###   ########.fr       */
+/*   Created: 2023/12/29 16:34:18 by ade-tole          #+#    #+#             */
+/*   Updated: 2023/12/29 16:34:19 by ade-tole         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
 
-static int	ft_isjulia(double z_re, double z_im, t_data *fractal)
+static int	ft_isburning(double c_re, double c_im, t_data *fractal)
 {
+	double	z_re;
+	double	z_im;
 	double	tmp;
 	int		i;
 
-	i = 1;
+	z_re = c_re;
+	z_im = c_im;
+	i = 0;
 	while (i <= fractal->iterations)
 	{
 		if ((z_re * z_re + z_im * z_im) > 4)
 			return (i);
-		tmp = 2 * z_re * z_im + fractal->julia_im;
-		z_re = (z_re * z_re) - (z_im * z_im) + fractal->julia_re;
+		z_re = fabs(z_re);
+		z_im = fabs(z_im);
+		tmp = 2 * z_re * z_im + c_im;
+		z_re = (z_re * z_re) - (z_im * z_im) + c_re;
 		z_im = tmp;
 		i++;
 	}
 	return (0);
 }
 
-void	render_julia(t_data *fractal)
+void	render_burningship(t_data *fractal)
 {
 	int		y;
 	int		x;
-	double	z_im;
-	double	z_re;
+	double	c_im;
+	double	c_re;
 
 	y = -1;
 	while (++y < HEIGHT)
 	{
 		x = -1;
-		z_im = (2.0 - (double)y * (2.0 - (-2.0)) / HEIGHT) \
+		c_im = (-2.0 + (double)y * (2.0 - (-2.0)) / HEIGHT) \
 				* fractal->zoom - fractal->shift_y;
 		while (++x < WIDTH)
 		{
-			z_re = (-2.0 + (double)x * (2.0 - (-2.0)) / WIDTH) \
+			c_re = (-2.0 + (double)x * (2.0 - (-2.0)) / WIDTH) \
 					* fractal->zoom + fractal->shift_x;
 			ft_put_pixel(&fractal->img, x, y, \
-					ft_getcolor(ft_isjulia(z_re, z_im, fractal), fractal));
+					ft_getcolor(ft_isburning(c_re, c_im, fractal), fractal));
 		}
 	}
 	mlx_put_image_to_window(fractal->mlx_ptr, fractal->mlx_win, \
