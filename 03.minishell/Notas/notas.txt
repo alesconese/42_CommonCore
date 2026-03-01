@@ -1,0 +1,104 @@
+
+-Makefile ✅ [PENDIENTE TESTS DE RELINK]
+-Pipeline ✅ [Hace falta optimizar el codigo para simplificarlo]
+-QUOTES
+	-[SOLVED✅] "$"AAA -> lo convierte a $AAA y intenta expandir la variable, se tiene que quedar como $AAA 
+	- Ultimo test:
+		{echo "hola que tal"42$HOME$4$"HOME$HOME"'$HOME'">tst">tst|wc} -> crea el archivo tst, printea ahi todo el string, y printea 0 0 0 en el terminal (IGUAL QUE BASH)
+-Redirections
+	-RED_IN ✅
+		- En archivos sin permisos Permission denied no controlado ✅
+		- < test.c da SEGV EN exec_cmd ✅
+		- < out cata | ls cuando si existe el DOC, DEBE DAR !MENSAJE DE ERROR! DE CATA Y NO DE LS  ❌ 
+		- cat < asd | cat Makefile | ls | cat < asd NO FUNVIONA igual ✅
+		- cat Makefile | cat < asd | ls ROMPE EL PROGRAMA ✅
+	minishell: ls: command not found
+		- < ouat cata | ls cuando NO existe el DOC, debej ejecutar el segundo comando y no lo hace  ✅
+	-RED_OUT
+		- cat test > no_permission  | wc DEBE EJECUTAR SEGUNDO COMANDO Y NO LO HACE ✅
+		- cata > asd | ls DEBE DAR !MENSAJE DE ERROR! DE CATA Y NO DE LS  ❌ 
+minishell: ls: command not found
+		-[SOLVED✅] este caso cat tests/test.c > tet | cat tests/test3 no funciona igual
+		-[SOLVED✅] cat test.c > te | cat este tampoco 
+		-[SOLVED✅] cat > te | cat 
+		-[SOLVED✅] < here.txt cat | wc > out.txt NO VA
+		- cat > tests/te | ca despues de interrupcion con ^C == exit_status 130, deberia ser 127 ❌
+-Heredoc
+	- cat < tests/test << eof DEBE DAR PRIORIDAD DE REDIRECCION DE INPUT AL ULTIMO METACHAR, ya sea red_in o here_doc
+-ft_wait_child_process
+	-hace falta añadir un iterador de el primer parametro para cada comando que se intenta ejecutar y falla, para que de el
+	mensaje de error correctamente
+-Append ❌
+-[SOLVED✅]Invalid cmd
+-[SOLVED✅]rutas absolutas
+- ls -lR $HOME | wc PETA!!!! ❌
+- EXPANSOR ⏳
+	- Expandir variables de entorno
+	- El EXPANSOR no debe mantener strings como $varnoexist en la lista de tokens si no existen ❌ 
+		- {$AAA} -> newline ✅
+		- {$AAA cmd} -> ejecuta comando ✅
+		- {cmd $AAA} -> ejecuta comando ✅
+		- {echo $AAA $HOME} -> ignora $AAA y ejecuta {echo $HOME} ✅
+		- {echho $HOME$} -> expande $HOME y deja el ulltimo $
+	- solo un comando con '$' -> Printea 'command not found', deberia ser 'is a directory' ❌
+	- OTRAS EXPANSIONES (En otros proyectos no estan implementadas ❓❓❓)
+		- {$$} -> Debe expandir a PID ❌
+		- {~} esto hay que expandirlo a la variable HOME ❌
+		- {$"HOME"} 
+- Implementar builtins ⏳
+	|-BUILTINS
+|     |-Echo (-n) ✅
+		- [SOLVED✅]echo -nnnnnnn hola debe mostrar hola sin newline 
+		- [SOLVED✅]echo -n -n -n -n -n hola debe mostrar hola sin newline 
+		- [SOLVED✅]echo -nnnnn -n -n -n hola debe mostrar hola sin newline
+|     |-cd (relative/absolute path) ❌
+		- cd - debe llevarte a tu OLDPWD
+|	  |-pwd ✅
+|	  |-export
+|	  |-unset 
+|	  |-env ✅
+|	  |-exit ❌
+		- exit 12 debe hacer exit con el numero pasado por parametro
+		- exit 1234 24 no debe salir y muestra mensaje de error de "bash: exit: too many arguments" exit status en 1.
+		- exit 1243a si sale con el numero 255 y muestra el mensaje de error bash: exit: 1243a: numeric argument required
+- $? ✅
+- ctrl-C, ctrl-D, ctrl-\ [❌  Hace falta optimizar el codigo para simplificarlo] 
+	- ctrl-D dentro de child (cat) debe printear {Quit: 3} ✅
+	- cat | cat | cat | cmd + ctrl-C -> pone exit_status en 130, deberia ser el return del ultimo cmd ❌
+
+gcc src/mminishell.c libft/libft.a -lreadline -ltermcap
+
+-L ~/.brew/opt/readline/lib -I ~/.brew/opt/readline/include //sin esto no pilla rl_replace_line
+
+
+
+-----------------ACTUALIZAR READ_LINE----------------------
+
+https://github.com/tjensen42/42-minishell
+
+Dependencies
+Install readline with brew
+brew install readline
+brew link --force readline
+Add the path to the lib
+
+Replace ~/.zshrc with ~/.bashrc if you use bash instead of zsh
+
+echo 'export C_INCLUDE_PATH="/usr/local/opt/readline/include:$C_INCLUDE_PATH"' >> ~/.zshrc
+echo 'export LIBRARY_PATH="/usr/local/opt/readline/lib:$LIBRARY_PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+
+if (NO 42 HOME BREW)
+
+Install readline on 42 Macs
+Install Brew, only if it is not already installed:
+
+rm -rf $HOME/.brew && git clone --depth=1 https://github.com/Homebrew/brew $HOME/.brew && echo 'export PATH=$HOME/.brew/bin:$PATH' >> $HOME/.zshrc && source $HOME/.zshrc && brew update
+Install Readline library:
+
+brew install readline
+brew link --force readline
+echo 'export C_INCLUDE_PATH="$HOME/.brew/include:$C_INCLUDE_PATH"' >> ~/.zshrc
+echo 'export LIBRARY_PATH="$HOME/.brew/lib:$LIBRARY_PATH"' >> ~/.zshrc
+source ~/.zshrc

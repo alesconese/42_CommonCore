@@ -1,0 +1,225 @@
+
+- Makefile ✅ [PENDIENTE TESTS DE RELINK]
+- Pipeline ✅ [Hace falta optimizar el codigo para simplificarlo]
+- QUOTES
+	- "$"AAA -> lo convierte a $AAA y intenta expandir la variable, se tiene que quedar como $AAA ❌
+
+
+parser:
+
+	- ls ><
+	- 'ls'|'wc'>><
+		sevfault!!! 
+- Redirections
+	- "< new cat > no_permission" muestra el output del cat en pantalla y no deberia  ✅ 
+	-RED_IN ✅
+		- En archivos sin permisos Permission denied no controlado ✅
+		- < test.c da SEGV EN exec_cmd ✅
+		- < out cata | ls cuando si existe el DOC, DEBE DAR !MENSAJE DE ERROR! DE CATA Y NO DE LS  ✅
+		- cat < no_permission | cat Makefile | ls | cat < no_permission NO FUNCIONA igual ✅ 
+
+			+ en caso de error de permisos falla, nuestra ejecucion da los dos mensajes
+			+ de error correspondientes, pero luego muestra el ls (que no deberia)✅ 
+			+ y deja el cat abierto ✅ [CAT CERRADO]
+
+			= Tratar de evitar la ejecucion del comando en caso de error con el archvio por permisos
+			= o q no exista
+
+		- cat Makefile | cat < asd | ls ROMPE EL PROGRAMA ✅
+		- cat < | queda el cat abierto ✅
+		- < ouat cata | ls cuando NO existe el DOC, debej ejecutar el segundo comando y no lo hace  ✅
+	-RED_OUT
+
+		- ⬇️ cat test > no_permission  | wc DEBE EJECUTAR SEGUNDO COMANDO Y NO LO HACE ✅ ⬇️
+
+			+ La salida del STD_OUT es incorrecta ya que el executor toma los dos tokens
+			+ de tipo WORD y los ejecuta, despues de redirigir la salida al archivo y fallar
+			+ el open, deberia redirigir algo incorrecto al extremo de escritura en la tuberia?
+
+		- "< no_permission < tests/new cat > new" da BAD FILE DESCRIPTOR  ✅
+		- "cat | ls | cat < no_permission > newfile" DEBE DEJAR EL CAT ABIERTO  ❌
+		- cata > asd | ls DEBE DAR !MENSAJE DE ERROR! DE CATA Y NO DE LS  ✅
+		-[SOLVED✅] este caso cat tests/test.c > tet | cat tests/test3 no funciona igual
+		-[SOLVED✅] < here.txt cat | wc > out.txt NO VA
+		-[SOLVED✅] cat test.c > te | cat este tampoco 
+		- ⬇️ cat > te | cat NO DA EXIT STATUS CORRECTO, BASH DA 0 Y NOSOTROS 130 ❌ ⬇️
+
+			+ basicamente toma la interrupcion con cntrl+c y la setea al codigo puesto,
+			+ deberia quedarse con 0 pero por que? es el primero comando o el segundo?
+
+		- ⬇️ cat > tests/te | ca despues de interrupcion con ^C == exit_status 130, deberia ser 127 ❌ ⬇️
+
+			+ pendiente de documentar el error
+- Heredoc
+
+	- [SOLVED✅]cat < tests/test << eof DEBE DAR PRIORIDAD DE REDIRECCION DE INPUT AL ULTIMO METACHAR, ya sea red_in o here_doc
+
+		+ la funcion selector_input(t_parser *d); se encarga de poner en el STD_IN la redir de INPUT
+		+ de mas a la derecha, ya sea here_doc o red_in
+
+	- ⬇️ cat | ls | cat << adios no mantiene abierto el cat ❌ ⬇️
+
+		+ ejecuta el cat, comunica tuberias, ejecuta ls, comunica tuberias y el here_doc 
+		+ reestablece el std_in al original para poder usar la readline correctamente.
+		+ deberia hacer "algo" para mantener abierto el cat?
+
+- Append ❌ (NO IMPLEMENTADO)
+- [SOLVED✅]Invalid cmd
+- [SOLVED✅]rutas absolutas
+- [SOLVED✅] ls -lR $HOME | wc 
+- EXPANSOR ⏳
+	- Expandir variables de entorno
+	- El EXPANSOR no debe mantener strings como $varnoexist en la lista de tokens si no existen ❌ 
+		- {$AAA} -> newline ✅
+		- {$AAA cmd} -> ejecuta comando ✅
+		- {cmd $AAA} -> ejecuta comando ✅
+		- {echo $AAA $HOME} -> ignora $AAA y ejecuta {echo $HOME} ✅
+		- {echho $HOME$} -> expande $HOME y deja el ulltimo $
+	- solo un comando con '$' -> Printea 'command not found', deberia ser 'is a directory' ❌
+	- OTRAS EXPANSIONES (En otros proyectos no estan implementadas ❓❓❓)
+		- '$$' -> Debe expandir a PID ❌
+		- '~' esto hay que expandirlo a la variable HOME ❌
+- Implementar builtins ⏳
+	|- BUILTINS
+|     |- Echo (-n) ❌
+		- echo -nnnnnnn hola debe mostrar hola sin newline 
+		- echo -n -n -n -n -n hola debe mostrar hola sin newline 
+		- echo -nnnnn -n -n -n hola debe mostrar hola sin newline
+|     |-cd (relative/absolute path) ❌
+		- cd - debe llevarte a tu OLDPWD
+|	  |-pwd ✅
+|	  |-export
+|	  |-unset 
+|	  |-env ✅
+|	  |-exit ❌
+		- exit 12 debe hacer exit con el numero pasado por parametro
+		- exit 1234 24 no debe salir y muestra mensaje de error de "bash: exit: too many arguments" exit status en 1.
+		- exit 1243a si sale con el numero 255 y muestra el mensaje de error bash: exit: 1243a: numeric argument required
+- $? ✅
+- ctrl-C, ctrl-D, ctrl-\ [❌  Hace falta optimizar el codigo para simplificarlo] 
+	- ctrl-D dentro de child (cat) debe printear {Quit: 3} ✅
+	- cat | cat | cat | cmd + ctrl-C -> pone exit_status en 130, deberia ser el return del ultimo cmd ❌
+
+ env -i ./Minishell
+NO ENTRA Y SI DEBERIA ❌
+
+unset SHLVL y despues ejecutar minishell debe crear la variable SHLVL y no la crea ❌
+
+unset HOME y despues CD  debe mostrar el error de "bash: cd: HOME not set"
+
+gcc src/mminishell.c libft/libft.a -lreadline -ltermcap
+
+-L ~/.brew/opt/readline/lib -I ~/.brew/opt/readline/include //sin esto no pilla rl_replace_line
+
+SEGMENTATION FAULTS!
+
+
+---------------------------------------------> test [237]
+|  CMD: ->test | ><-
+|--------------------------------
+|  EXPECTED (BASH OUTP)  |  exit status: (2)
+|
+|--- STDOUT:
+| -><-
+|
+|--- STDERR:
+| ->bash: line 1: syntax error near unexpected token `newline'$
+| bash: line 1: `test | >'$<-
+|
+|--- COMPARED STR:
+| ->syntax error near unexpected token <-
+|--------------------------------
+|--->FOUND (MINISHELL OUTP)  |  exit status: (134)
+|
+| AddressSanitizer:DEADLYSIGNAL
+| =================================================================
+| ==87098==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x000103f18a2c bp 0x7ffeebcf5140 sp 0x7ffeebcf4b70 T0)
+| ==87098==The signal is caused by a READ memory access.
+| ==87098==Hint: address points to the zero page.
+|     #0 0x103f18a2c in typer_tokens typer.c:63
+|     #1 0x103f11d29 in parser parser.c:142
+|     #2 0x103f0e2b3 in input_loop mminishell.c:149
+|     #3 0x103f0e4a3 in main mminishell.c:165
+|     #4 0x7fff6c606cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+| 
+| ==87098==Register values:
+| rax = 0x0000000000000000  rbx = 0x00007ffeebcf52e0  rcx = 0x0000000000000000  rdx = 0x0000100000000000  
+| rdi = 0x0000100000000000  rsi = 0x0000100000000000  rbp = 0x00007ffeebcf5140  rsp = 0x00007ffeebcf4b70  
+|  r8 = 0x00007ffeebcf5200   r9 = 0x0000000000000000  r10 = 0x0000000000000003  r11 = 0x0000000000000246  
+| r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000000  
+| AddressSanitizer can not provide additional info.
+| SUMMARY: AddressSanitizer: SEGV typer.c:63 in typer_tokens
+| ==87098==ABORTING
+| mpanic.sh: line 164: 87098 Abort trap: 6           ./minishell
+|
+---------------------------------------------<
+
+---------------------------------------------> test [238]
+|  CMD: ->test | >><-
+|--------------------------------
+|  EXPECTED (BASH OUTP)  |  exit status: (2)
+|
+|--- STDOUT:
+| -><-
+|
+|--- STDERR:
+| ->bash: line 1: syntax error near unexpected token `newline'$
+| bash: line 1: `test | >>'$<-
+|
+|--- COMPARED STR:
+| ->syntax error near unexpected token <-
+|--------------------------------
+|--->FOUND (MINISHELL OUTP)  |  exit status: (134)
+|
+| AddressSanitizer:DEADLYSIGNAL
+| =================================================================
+| ==87163==ERROR: AddressSanitizer: SEGV on unknown address 0x000000000000 (pc 0x0001012b0a0f bp 0x7ffeee95e140 sp 0x7ffeee95db70 T0)
+| ==87163==The signal is caused by a READ memory access.
+| ==87163==Hint: address points to the zero page.
+|     #0 0x1012b0a0f in typer_tokens typer.c:107
+|     #1 0x1012a8d29 in parser parser.c:142
+|     #2 0x1012a52b3 in input_loop mminishell.c:149
+|     #3 0x1012a54a3 in main mminishell.c:165
+|     #4 0x7fff6c606cc8 in start+0x0 (libdyld.dylib:x86_64+0x1acc8)
+|
+| ==87163==Register values:
+| rax = 0x0000000000000000  rbx = 0x00007ffeee95e2e0  rcx = 0x0000000000000000  rdx = 0x0000100000000000
+| rdi = 0x0000100000000000  rsi = 0x0000100000000000  rbp = 0x00007ffeee95e140  rsp = 0x00007ffeee95db70
+|  r8 = 0x00007ffeee95e200   r9 = 0x0000000000000000  r10 = 0x0000000000000003  r11 = 0x0000000000000246
+| r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0x0000000000000000  r15 = 0x0000000000000000
+| AddressSanitizer can not provide additional info.
+| SUMMARY: AddressSanitizer: SEGV typer.c:107 in typer_tokens
+| ==87163==ABORTING
+| mpanic.sh: line 164: 87163 Abort trap: 6           ./minishell
+|
+---------------------------------------------<
+-----------------ACTUALIZAR READ_LINE----------------------
+
+https://github.com/tjensen42/42-minishell
+
+Dependencies
+Install readline with brew
+brew install readline
+brew link --force readline
+Add the path to the lib
+
+Replace ~/.zshrc with ~/.bashrc if you use bash instead of zsh
+
+echo 'export C_INCLUDE_PATH="/usr/local/opt/readline/include:$C_INCLUDE_PATH"' >> ~/.zshrc
+echo 'export LIBRARY_PATH="/usr/local/opt/readline/lib:$LIBRARY_PATH"' >> ~/.zshrc
+source ~/.zshrc
+
+
+if (NO 42 HOME BREW)
+
+Install readline on 42 Macs
+Install Brew, only if it is not already installed:
+
+rm -rf $HOME/.brew && git clone --depth=1 https://github.com/Homebrew/brew $HOME/.brew && echo 'export PATH=$HOME/.brew/bin:$PATH' >> $HOME/.zshrc && source $HOME/.zshrc && brew update
+Install Readline library:
+
+brew install readline
+brew link --force readline
+echo 'export C_INCLUDE_PATH="$HOME/.brew/include:$C_INCLUDE_PATH"' >> ~/.zshrc
+echo 'export LIBRARY_PATH="$HOME/.brew/lib:$LIBRARY_PATH"' >> ~/.zshrc
+source ~/.zshrc
