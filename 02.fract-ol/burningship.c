@@ -1,0 +1,66 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   burningship.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ade-tole <ade-tole@student.42barcel>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/12/29 16:34:18 by ade-tole          #+#    #+#             */
+/*   Updated: 2023/12/29 16:34:19 by ade-tole         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "fractol.h"
+
+static int	ft_isburning(double c_re, double c_im, t_data *fractal)
+{
+	double	z_re;
+	double	z_im;
+	double	tmp;
+	int		i;
+
+	z_re = c_re;
+	z_im = c_im;
+	i = 1;
+	while (i < fractal->iterations)
+	{
+		if ((z_re * z_re + z_im * z_im) > 4)
+			return (i);
+		z_re = fabs(z_re);
+		z_im = fabs(z_im);
+		tmp = 2 * z_re * z_im + c_im;
+		z_re = (z_re * z_re) - (z_im * z_im) + c_re;
+		z_im = tmp;
+		i++;
+	}
+	return (i);
+}
+
+void	render_burningship(t_data *fractal)
+{
+	int		y;
+	int		x;
+	double	c_im;
+	double	c_re;
+	int		i;
+
+	y = -1;
+	while (++y < HEIGHT)
+	{
+		x = -1;
+		c_im = (-2.0 + (double)y * (2.0 - (-2.0)) / HEIGHT) \
+				* fractal->zoom - fractal->shift_y;
+		while (++x < WIDTH)
+		{
+			c_re = (-2.0 + (double)x * (2.0 - (-2.0)) / WIDTH) \
+					* fractal->zoom + fractal->shift_x;
+			i = ft_isburning(c_re, c_im, fractal);
+			if (i == fractal->iterations)
+				ft_put_pixel(&fractal->img, x, y, 0);
+			else
+				ft_put_pixel(&fractal->img, x, y, ft_getcolor(i, fractal));
+		}
+	}
+	mlx_put_image_to_window(fractal->mlx_ptr, fractal->mlx_win, \
+			fractal->img.mlx_img, 0, 0);
+}
